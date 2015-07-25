@@ -1,5 +1,6 @@
 ## Weight Lifting Exercise Prediction Assignment
 In this assignment, I create two R scripts help me to run model with different parameters, and save the results to different directories for me to pickup the model with better accuracy
+## files in this repo
 1. index.Rmd: R markdown shows codes training model to predict the 20 testing cases
 1. [compiled html from R markdwon](http://powertsai.github.io/WLEPredictionModel/)
 1. WLEWriteUp.R script used to to build the model for this assignment
