@@ -22,4 +22,4 @@ In this assignment, I create two R scripts help me to run model with different p
   4. testPred <- predict(modFit, testCase)
   5. pml_write_files(testPred, modDir= "RPART70/")  
 1. index.Rmd: R markdown shows codes training model to predict the 20 testing cases
-2. [compiled html from R markdwon](http://powertsai.github.io/WLEPredictionModel/)
+1. [compiled html from R markdwon](http://powertsai.github.io/WLEPredictionModel/)
