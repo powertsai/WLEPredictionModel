@@ -24,6 +24,8 @@ barplot(table(trainData$classe),
 
 
 ### Make Clean data
+Random Forest takes a lot of time to train model, I decides to skip the columns with missing value or nearZeroVar nzv is TRUE or zeroVar is TRUE
+After cleaning data ,
 -------------------------------------
 1. remove columns not related to measurement and classe
 -------------------------------------
@@ -71,17 +73,16 @@ testing <- cleanData[-inTrain,]
 
 ### Training model by training Data
 ```{r}
-# parallel train model with random forest 
+#Parallel Random Forest 
 require(e1071)
 require(foreach)
 #parameter I used to train model
-#modFit <- train(training$classe ~., data = training, 
-#                method = "rf", ntree=300, 
-#                importance = TRUE, 
-#                trControl = trainControl(method = "cv",  number = 5) ) 
+#modFit <- train(training$classe ~., data = training, method = "parRF") #default 
+##             ,trControl = trainControl(method = "cv",  number = 4)  #option
+#              ,importance = TRUE) )   #option
 #build compiled html, I read trained model from file instead of training model
 setwd("/Users/hadoop/Dropbox/R/MachineLearning")
-modResult <- readRDS("RF70CV5/modFit.RData")
+modResult <- readRDS("parRF70/modFit.RData")
 modFit <- modResult$mod
 show(modFit)
 ```
@@ -92,7 +93,7 @@ show(modFit)
 pred <- predict(modFit, testing)
 cm <- confusionMatrix(testing$classe, pred)
 show(cm)
-# write.csv(data.frame(overall= cm$overall), file=paste0(modDir, "overall.txt"))
+write.csv(data.frame(overall= cm$overall), file="overall.txt")
 # write.csv(cm$byClass, file = paste0(modDir, "confusionByClass.csv"))
 ```
 
@@ -112,8 +113,41 @@ print(plot)
 # save plot
 #ggsave(filename="WLE/ConfusionMatrix.jpg" , plot=plot)
 ```
+### plot the point with wrong prediction
+```{r}
+#display the importance variables 
+head(importance(modFit$finalModel))
+predRight <- pred == testing$classe
+# plot roll_belt v.s pitch_belt
+p <- qplot(roll_belt , pitch_belt, col=classe, data=testing)
+p + geom_point(aes(x=roll_belt,y= pitch_belt, col="Error"),size=6,shape=4,
+               data=testing[which(!predRight), ])
+```
+
+### combine the overall accuracy of training models
+```{r}
+setwd("/Users/hadoop/Dropbox/R/MachineLearning")
+overall <- read.csv("parRF60CtrlN8/overall.txt")
+names(overall) <- c("overall", "parRF60CtrlN8")
+overall[c(2:6), 2] <- round(overall[c(2:6), 2] ,5)
+
+acc <- read.csv("parRF70/overall.txt")
+overall <- mutate(overall, parRF70 = round(acc[,2],5))
+
+acc1 <- read.csv("RF50NACtrlN4/overall.txt")
+overall <- mutate(overall, RF50NACtrlN4 = round(acc1[,2],5))
+
+acc2 <- read.csv("parRF60CtrlN8/overall.txt")
+overall <- mutate(overall, parRF60CtrlN8 = round(acc2[,2],5))
+
+acc3 <- read.csv("RF60CtrlN4/overall.txt")
+overall <- mutate(overall, RF60CtrlN4 = round(acc3[,2],5))
+overall[-c(1,7),]
+```
+
 
 ### Predict 20 new testing cases
+choose the model by
 ```{r}
 setwd("/Users/hadoop/Dropbox/R/MachineLearning")
 # read new test data
