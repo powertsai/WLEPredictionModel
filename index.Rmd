@@ -1,0 +1,130 @@
+---
+title: "Weight Lifting Exercise Prediction Model"
+author: "AllenTsai"
+date: "2015/7/25"
+output: html_document
+---
+
+In this assignment, I clean the train data by columns without missing values and remove some coumns by nearZeroVar. I split the train data into training / testing set to validate the model before running the 20 test cases of this assignment. I use Randorm Forest to train my model for prediction. I change some parameters to find a better model to predict the 20 test cases to submit for this assignment. 
+The data for this project come from this source:  <http://groupware.les.inf.puc-rio.br/har>.
+
+### Read training data
+```{r}
+setwd("/Users/hadoop/Dropbox/R/MachineLearning")
+trainData <- read.csv("pml-training.csv", 
+                      header = TRUE, sep=",")
+
+#print bar plot show the distribution of classe
+barplot(table(trainData$classe), 
+        xlab="classe", 
+        ylab="quantity", 
+        main="Quantity by classes - Weight Lifting Exercise training dataset",
+        col=c(2:6))
+```
+
+
+### Make Clean data
+-------------------------------------
+1. remove columns not related to measurement and classe
+-------------------------------------
+```{r}
+# remove columns not related to measurement and classe
+trainData <- trainData[,-(1:7)]
+# convert to numeric for each column , except classe
+for(i in c(1:152)) {
+    trainData[,i] <- as.numeric(trainData[,i])
+}
+```
+-------------------------------------
+2. remove column with N/A, 
+-------------------------------------
+```{r}
+# remove column with N/A
+naTrainIdx <-apply(trainData, 2, function(x) any(is.na(x)))
+cleanData <- trainData[, which(!naTrainIdx)]
+# check every element is not N/A
+sum(is.na(cleanData))
+```
+-------------------------------------
+3. keep columns by nearZeroVar which(!nsv$zeroVar & !nsv$nzv)
+-------------------------------------
+```{r}  
+#check NearZeroVar, remove zeroVar  or nzv  
+require(caret)
+nsv <- nearZeroVar(cleanData, saveMetrics= TRUE)
+head(nsv)
+subset <- row.names(nsv) [which(!nsv$zeroVar & !nsv$nzv)]
+  
+require(dplyr)
+cleanData = select(cleanData, which(names(cleanData) %in% subset) )
+```
+
+### Split data to training/testing set
+```{r}
+#split into training(0.70)/testing(0.30) data set to validate model
+require(caret)
+set.seed(1000)
+inTrain<-createDataPartition(cleanData$classe,p=0.70 ,list=FALSE)
+training <- cleanData[inTrain,]
+testing <- cleanData[-inTrain,]
+```
+
+### Training model by training Data
+```{r}
+# parallel train model with random forest 
+require(e1071)
+require(foreach)
+#parameter I used to train model
+#modFit <- train(training$classe ~., data = training, 
+#                method = "rf", ntree=300, 
+#                importance = TRUE, 
+#                trControl = trainControl(method = "cv",  number = 5) ) 
+#build compiled html, I read trained model from file instead of training model
+setwd("/Users/hadoop/Dropbox/R/MachineLearning")
+modResult <- readRDS("RF70CV5/modFit.RData")
+modFit <- modResult$mod
+show(modFit)
+```
+
+### Predict testing cases
+```{r}
+#Predicting testing and display confusion matrix
+pred <- predict(modFit, testing)
+cm <- confusionMatrix(testing$classe, pred)
+show(cm)
+# write.csv(data.frame(overall= cm$overall), file=paste0(modDir, "overall.txt"))
+# write.csv(cm$byClass, file = paste0(modDir, "confusionByClass.csv"))
+```
+
+### plot the frequency of predict v.s. actual
+```{r}
+require(ggplot2)
+input.matrix <- data.matrix(cm)
+confusion <- as.data.frame(as.table(input.matrix))
+plot <- ggplot(confusion)
+plot <- plot + geom_tile(aes(x=Var1, y=Var2, fill=Freq)) + 
+scale_x_discrete(name="Actual Classe") + 
+scale_y_discrete(name="Predicted Classe") + 
+scale_fill_gradient(breaks=seq(from=3000, to=0, by=-500), low="pink", high = "red") +
+    labs(fill="Frequency") +
+    geom_text(aes(x = Var1, y = Var2, label = Freq), size = 3)
+print(plot)
+# save plot
+#ggsave(filename="WLE/ConfusionMatrix.jpg" , plot=plot)
+```
+
+### Predict 20 new testing cases
+```{r}
+setwd("/Users/hadoop/Dropbox/R/MachineLearning")
+# read new test data
+testData <-  read.csv("pml-testing.csv", header = TRUE, sep=",")
+# predict new data with model 
+testPred <- predict(modFit, testData)
+# create output for assignment
+##pml_write_files("WLE/", testPred) 
+```
+
+
+### Reference
+1. Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+Read more: <http://groupware.les.inf.puc-rio.br/har#wle_paper_section#ixzz3gpGqu9xB>
