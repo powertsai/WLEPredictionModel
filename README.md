@@ -21,6 +21,11 @@ In this assignment, I create two R scripts help me to run model with different p
 1. RunningModels.R script used to train model with different parameters, save confusionMatrix, and predict 20 new test cases and writes prediction result for this assignment
   1. cData <- cleanData(data = trainData)
   2. pData <- probeData(cData, 0.7)
-  3. (modFit <- runRFModel(data = pData,  modDir = "RPART70/", method="rpart", preProcess= "pca") )
+  3. modFit1 <- runRFModel(data = pData,  modDir = "parRF70/", method = "parRF")
   4. testPred <- predict(modFit, testCase)
   5. pml_write_files(testPred, modDir= "RPART70/")  
+1. modFit.RData 
+  1. mod: training mod Parallel Random Forest 
+  2. cfMatrix: confusion matrix
+  3. cfplot: confusion matrix plot
+
