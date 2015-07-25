@@ -24,8 +24,8 @@ In this assignment, I create two R scripts help me to run model with different p
   3. modFit1 <- runRFModel(data = pData,  modDir = "parRF70/", method = "parRF")
   4. testPred <- predict(modFit, testCase)
   5. pml_write_files(testPred, modDir= "RPART70/")  
-1. modFit.RData 
-  1. mod: training mod Parallel Random Forest 
+1. modFit.RData: a list of training model
+  1. mod: training model by Parallel Random Forest 
   2. cfMatrix: confusion matrix
   3. cfplot: confusion matrix plot
 
