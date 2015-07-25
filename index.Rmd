@@ -82,7 +82,7 @@ require(foreach)
 #              ,importance = TRUE) )   #option
 #build compiled html, I read trained model from file instead of training model
 setwd("/Users/hadoop/Dropbox/R/MachineLearning")
-modResult <- readRDS("parRF70/modFit.RData")
+modResult <- readRDS("RF70CV5/modFit.RData")
 modFit <- modResult$mod
 show(modFit)
 ```
@@ -116,11 +116,13 @@ print(plot)
 ### plot the point with wrong prediction
 ```{r}
 #display the importance variables 
-head(importance(modFit$finalModel))
+imp_vals <- importance(modFit$finalModel)
+tail(imp_vals[order(imp_vals[,6]),])
+
 predRight <- pred == testing$classe
 # plot roll_belt v.s pitch_belt
-p <- qplot(roll_belt , pitch_belt, col=classe, data=testing)
-p + geom_point(aes(x=roll_belt,y= pitch_belt, col="Error"),size=6,shape=4,
+p <- qplot(yaw_belt , roll_belt, col=classe, data=testing)
+p + geom_point(aes(x=yaw_belt,y= roll_belt, col="Error"),size=6,shape=4,
                data=testing[which(!predRight), ])
 ```
 
