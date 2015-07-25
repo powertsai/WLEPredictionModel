@@ -49,7 +49,7 @@ probeData <- function(cleanData, prob) {
 # create confusionMatrix by testing$classe and predicted value
 # save confusionMatrix$overall , confusionMatrix$byClass
 # plot the frequency of predict v.s. actual and save image
-runRFModel <- function(data = pData, modDir = "NZV", ...) {
+runRFModel <- function(pData , modDir = "NZV", ...) {
   #install.packages("e1071")
   require(e1071)
   require(foreach)
@@ -66,6 +66,7 @@ runRFModel <- function(data = pData, modDir = "NZV", ...) {
   table(pred, testing$classe)
   
   (cm <- confusionMatrix(testing$classe, pred))
+  print(cm)
   write.csv(data.frame(overall= cm$overall), file=paste0(modDir, "overall.txt"))
   write.csv(cm$byClass, file = paste0(modDir, "confusionByClass.csv"))
   
@@ -82,9 +83,13 @@ runRFModel <- function(data = pData, modDir = "NZV", ...) {
     labs(fill="Frequency") +
     geom_text(aes(x = Var1, y = Var2, label = Freq), size = 3)
   print(plot)
-  ggsave(filename=paste0(modDir, "Confusion.jpg"), plot=plot)
+  ggsave(filename=paste0(modDir, "ConfusionMatrix.jpg"), plot=plot)
   
-  return (modFit1)
+  modResult <- list(mod = modFit1, cfplot = plot, cfMatrix = cm)
+  #save model result
+  saveRDS(modResult, file = paste0(modDir,"modFit.RData") ) 
+  
+  return (modResult)
 }
 
 #write prediction txt
