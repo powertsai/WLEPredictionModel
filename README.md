@@ -1,7 +1,5 @@
 ##Weight Lifting Exercise Prediction Assignment
-<<<<<<< HEAD
 In this assignment, I create two R scripts help me to run model with different parameters, and save the results to different directories for me to pickup the model with better accuracy
-
 1. WLEWriteUp.R script used to to build the model for this assignment
   1. cleanData function(data) return cleanData
      1. keep measurement value and classe only
@@ -24,7 +22,7 @@ In this assignment, I create two R scripts help me to run model with different p
   4. testPred <- predict(modFit, testCase)
   5. pml_write_files(testPred, modDir= "RPART70/")  
 1. index.Rmd: R markdown shows how I build the model to predict the 20 testing cases
-2. index.html, index_files:  the compiled html from R markdwon
+2. [compiled html from R markdwon](http://powertsai.github.io/WLEPredictionModel/)
 =======
 1. steps to build the model for this assignment
   1. cleaning the data 
