@@ -16,15 +16,13 @@ barplot(table(trainData$classe), xlab="classe", ylab="quantity",
 print("rpart ")
 cData <- cleanData(data = trainData)
 pData <- probeData(cData, 0.7)
-(modFit <- runRFModel(data = pData,  modDir = "RPART70/", method="rpart", preProcess= "pca", prox=TRUE) )
+(modFit <- runRFModel(data = pData,  modDir = "RPART70/", method="rpart", 
+                      preProcess= "pca") )
 testCase <- cleanData(data = testData)
 testCase <- testCase[,c(1:52)]
-testPred <- predict(modFit, testCase)
+testPred <- predict(modFit$mod, testCase)
 pml_write_files(testPred, modDir= "RPART70/")  
 
-pData <- probeData(trainData, 0.7)
-modFitXX <- runRFModel(data = pData,  modDir = "parRF70/", method = "parRF" ,prox=TRUE) 
-saveRDS(modFitXX, "modFitXX.RData")
 
 #Parallel Random Forest
 print("run parRF");
@@ -34,7 +32,7 @@ modDir = "parRF70/"
 (modFit1 <- runRFModel(data = pData,  modDir = modDir, method = "parRF", prox=TRUE) );
 testCase <- cleanData(data = testData);
 testCase <- testCase[,-length(names(testCase))];
-testPred <- predict(modFit1, testCase);
+testPred <- predict(modFit1$mod, testCase);
 pml_write_files(testPred, modDir= modDir) ;
 
 #Parallel Random Forest with custom train Control
@@ -47,7 +45,7 @@ pData <- probeData(cData, 0.7)
                        ,importance = TRUE, prox=TRUE) )
 testCase <- cleanData(data = testData)
 testCase <- testCase[,-length(names(testCase))]
-testPred <- predict(modFit2, testCase)
+testPred <- predict(modFit2$mod, testCase)
 pml_write_files(testPred, modDir= modDir) 
 
 
@@ -60,7 +58,7 @@ pData <- probeData(cData, 0.6)
                        ,importance = TRUE, prox=TRUE) )
 testCase <- cleanData(data = testData)
 testCase <- testCase[,-length(names(testCase))]
-testPred <- predict(modFit3, testCase)
+testPred <- predict(modFit3$mod, testCase)
 pml_write_files(testPred, modDir= modDir) 
 
 print("run RF prob=0.6 with trainControl Method=cv Number = 4")
@@ -68,11 +66,12 @@ modDir <- "RF60CtrlN4/"
 cData <- cleanData(trainData)
 pData <- probeData(cData, 0.6)
 (modFit4 <- runRFModel(data = pData,  modDir = modDir , method = "rf"
+                       ,preProcess= "pca"
                        ,trControl = trainControl(method = "cv",  number = 4)
                        ,importance = TRUE, prox=TRUE) )
 testCase <- cleanData(data = testData)
 testCase <- testCase[,-length(names(testCase))]
-testPred <- predict(modFit4, testCase)
+testPred <- predict(modFit4$mod, testCase)
 pml_write_files(testPred, modDir= modDir) 
 
 
@@ -85,9 +84,17 @@ modDir <- "RF70CV5/"
                        importance = TRUE, prox=TRUE))
 testCase <- cleanData(data = testData)
 testCase <- testCase[,-length(names(testCase))]
-testPred <- predict(modFit5, testCase)
+testPred <- predict(modFit5$mod, testCase)
 pml_write_files(testPred, modDir= modDir) 
 
 
+print("run RF All Columns nTree 250")
+modDir <- "RF70ALL/"
+(modFit6 <- runRFModel(data = pData,  modDir = modDir , method = "rf" , 
+                       ntree=250 ,
+                       trControl = trainControl(method = "cv",  number = 4), 
+                       importance = TRUE, prox=TRUE))
+testPred <- predict(modFit6$mod, testData)
+pml_write_files(testPred, modDir= modDir) 
 
 
