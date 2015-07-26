@@ -16,7 +16,7 @@ barplot(table(trainData$classe), xlab="classe", ylab="quantity",
 print("rpart ")
 cData <- cleanData(data = trainData)
 pData <- probeData(cData, 0.7)
-(modFit <- runRFModel(data = pData,  modDir = "RPART70/", method="rpart", preProcess= "pca") )
+(modFit <- runRFModel(data = pData,  modDir = "RPART70/", method="rpart", preProcess= "pca", prox=TRUE) )
 testCase <- cleanData(data = testData)
 testCase <- testCase[,c(1:52)]
 testPred <- predict(modFit, testCase)
@@ -31,7 +31,7 @@ print("run parRF");
 cData <- cleanData(trainData);
 pData <- probeData(cData, 0.7);
 modDir = "parRF70/"
-(modFit1 <- runRFModel(data = pData,  modDir = modDir, method = "parRF") );
+(modFit1 <- runRFModel(data = pData,  modDir = modDir, method = "parRF", prox=TRUE) );
 testCase <- cleanData(data = testData);
 testCase <- testCase[,-length(names(testCase))];
 testPred <- predict(modFit1, testCase);
@@ -44,7 +44,7 @@ cData <- cleanData(trainData)
 pData <- probeData(cData, 0.7)
 (modFit2 <- runRFModel(data = pData,  modDir = modDir , method = "parRF"
                        ,trControl = trainControl(method = "cv",  number = 4)
-                       ,importance = TRUE) )
+                       ,importance = TRUE, prox=TRUE) )
 testCase <- cleanData(data = testData)
 testCase <- testCase[,-length(names(testCase))]
 testPred <- predict(modFit2, testCase)
@@ -57,7 +57,7 @@ cData <- cleanData(trainData)
 pData <- probeData(cData, 0.6)
 (modFit3 <- runRFModel(data = pData,  modDir = modDir , method = "parRF"
                        ,trControl = trainControl(method = "cv",  number = 8)
-                       ,importance = TRUE) )
+                       ,importance = TRUE, prox=TRUE) )
 testCase <- cleanData(data = testData)
 testCase <- testCase[,-length(names(testCase))]
 testPred <- predict(modFit3, testCase)
@@ -69,7 +69,7 @@ cData <- cleanData(trainData)
 pData <- probeData(cData, 0.6)
 (modFit4 <- runRFModel(data = pData,  modDir = modDir , method = "rf"
                        ,trControl = trainControl(method = "cv",  number = 4)
-                       ,importance = TRUE) )
+                       ,importance = TRUE, prox=TRUE) )
 testCase <- cleanData(data = testData)
 testCase <- testCase[,-length(names(testCase))]
 testPred <- predict(modFit4, testCase)
@@ -80,33 +80,14 @@ pml_write_files(testPred, modDir= modDir)
 
 print("run RF prob=0.7")
 modDir <- "RF70CV5/"
-cData <- cleanData(data = trainData)
-pData <- probeData(cData, 0.7)
-
-(modFit5 <- runRFModel(data = pData,  modDir = modDir , method = "rf" ,
+(modFit5 <- runRFModel(data = pData,  modDir = modDir , method = "rf" , 
                        trControl = trainControl(method = "cv",  number = 4), 
-                       importance = TRUE))
-modResult <- readRDS("RF70CV5/modFit.RData")
-modFit5 <- modResult$mod
+                       importance = TRUE, prox=TRUE))
 testCase <- cleanData(data = testData)
 testCase <- testCase[,-length(names(testCase))]
 testPred <- predict(modFit5, testCase)
 pml_write_files(testPred, modDir= modDir) 
 
-testing <- pData$testing
-require(randomForest)
-require(caret)
-importance(modFit5$finalModel)
-print(modResult$cfMatrix)
-pred <- predict(modFit5, testing)
-predRight <- pred==testing$classe
-table(pred, testing$classe)
-
-
-head(importance(modFit5$finalModel))
-p <- qplot(roll_belt , pitch_belt, col=classe, data=testing)
-p + geom_point(aes(x=roll_belt,y= pitch_belt, col="Error"),size=6,shape=4,
-               data=testing[which(!predRight), ])
 
 
 
